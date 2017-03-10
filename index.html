@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="UTF-8">
     <title>Mini Studio</title>
-  </head>
-  <body>
-    <div>
-         <button  onclick="evalScript()">Run </button>
-     </div>
-    <div id="editor">/* JavaScript source*/</div>
-     
-    <script src="build/ace/src/ace.js" type="text/javascript" charset="utf-8"></script> 
-     <script src="build/ace/src/mode-javascript.js" type="text/javascript" charset="utf-8"></script> 
-   
+</head>
+
+<body>
+
+    <div id="container">
+        <div>
+
+            <button onclick="evalScript()">Run </button>
+            <button onclick="chooseServer()">Choose Server </button>
+            <br/>
+        </div>
+        <div id="server-path">Unset</div>
+        <div id="editor">/* JavaScript source*/</div>
+        <div>Output: </div>
+        <div id="eval-area"></div>
+    </div>
+    <script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="src/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="src/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <!-- Insert this line after script imports -->
+    <script>if (window.module) module = window.module;</script>
     <script>
         const {ipcRenderer} = require('electron')
         
@@ -21,27 +34,57 @@
         editor.session.setMode(new JavaScriptMode());
         
 
-        function evalScript()
-        {
+        function evalScript(){
+
            var scriptText = editor.session.getValue();
            ipcRenderer.send("eval-on-server",scriptText);
         }
 
+        function chooseServer(){
+            
+            var serverPath = ipcRenderer.send("choose-server",null);
+            
+
+        }
         ipcRenderer.on('connected-server', (event, arg) => {
             //connection done
         })
         
-        
-        ipcRenderer.on('eval-done', (event, arg) => {
-            //eval done
+        ipcRenderer.on('server-choose', (event, arg) => {
+           console.log(arg);
+            $('#server-path').text(arg);
         })
-    </script> 
+        
+        ipcRenderer.on('eval-done', (event, data) => {
+           let res = JSON.parse(data);
+           $('#eval-area').text(JSON.stringify(res.result));
+        })
+    </script>
     <style>
-    #editor {
-        position: absolute;
-        width: 70%;
-        height: 50%;
-    }
+        #container {
+            position: absolute;
+            width: 100%;
+            height: 90%;
+        }
+        
+        #editor {
+            position: relative;
+            width: 70%;
+            height: 50%;
+        }
+        
+        #eval-area {
+            position: relative;
+            width: 70%;
+            height: 20%;
+        }
+        
+        #server-path {
+            position: relative;
+            width: 70%;
+            height: 30px;
+        }
     </style>
-  </body>
+</body>
+
 </html>
