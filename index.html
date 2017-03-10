@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Mini Studio</title>
+  </head>
+  <body>
+    <div>
+         <button  onclick="evalScript()">Run </button>
+     </div>
+    <div id="editor">/* JavaScript source*/</div>
+     
+    <script src="build/ace/src/ace.js" type="text/javascript" charset="utf-8"></script> 
+     <script src="build/ace/src/mode-javascript.js" type="text/javascript" charset="utf-8"></script> 
+   
+    <script>
+        const {ipcRenderer} = require('electron')
+        
+        var editor = ace.edit("editor");
+        var JavaScriptMode = ace.require("ace/mode/javascript").Mode;
+        editor.session.setMode(new JavaScriptMode());
+        
+
+        function evalScript()
+        {
+           var scriptText = editor.session.getValue();
+           ipcRenderer.send("eval-on-server",scriptText);
+        }
+
+        ipcRenderer.on('connected-server', (event, arg) => {
+            //connection done
+        })
+        
+        
+        ipcRenderer.on('eval-done', (event, arg) => {
+            //eval done
+        })
+    </script> 
+    <style>
+    #editor {
+        position: absolute;
+        width: 70%;
+        height: 50%;
+    }
+    </style>
+  </body>
+</html>

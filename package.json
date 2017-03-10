@@ -1,0 +1,17 @@
+{
+  "name": "mini-studio",
+  "version": "1.0.0",
+  "description": "a minimal studio",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ayoub Serti",
+  "license": "ISC",
+  "dependencies": {
+    "ace-code-editor": "^1.2.3",
+    "bootstrap": "^3.3.7",
+    "electron": "^1.6.2",
+    "jquery": "^3.1.1"
+  }
+}
