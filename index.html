@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Mini Studio</title>
+    <link rel="stylesheet" type="text/css" href="src/iplastic.css">
+    <title>Mini Shell</title>
 </head>
 
 <body>
@@ -15,13 +16,18 @@
             <button onclick="chooseServer()">Choose Server </button>
             <br/>
         </div>
-        <div id="server-path">Unset</div>
+        <div id="server-path"><b>Unset<b></div>
         <div id="editor">/* JavaScript source*/</div>
+        <hr>
         <div>Output: </div>
         <div id="eval-area"></div>
     </div>
+    <div id="footer">
+    	<b>Not Connected</b>
+    </div>
     <script src="src/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="src/mode-javascript.js" type="text/javascript" charset="utf-8"></script>
+    <script src="src/iplastic.js" type="text/javascript" charset="utf-8"></script>
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="src/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     <!-- Insert this line after script imports -->
@@ -32,7 +38,7 @@
         var editor = ace.edit("editor");
         var JavaScriptMode = ace.require("ace/mode/javascript").Mode;
         editor.session.setMode(new JavaScriptMode());
-        
+        editor.setTheme("ace/theme/iplastic")
 
         function evalScript(){
 
@@ -47,11 +53,11 @@
 
         }
         ipcRenderer.on('connected-server', (event, arg) => {
-            //connection done
+            $("#footer").css('background-color', 'green');
+            $("#footer").text("Connected " +arg)
         })
         
         ipcRenderer.on('server-choose', (event, arg) => {
-           console.log(arg);
             $('#server-path').text(arg);
         })
         
@@ -61,6 +67,18 @@
         })
     </script>
     <style>
+        #footer
+        {
+            background-color:red;
+            position:fixed;
+            bottom:0px;
+            left:0px;
+            right:0px;
+            height:20px;
+            width : 100%;
+            margin-bottom:0px;
+        }
+       
         #container {
             position: absolute;
             width: 100%;
@@ -69,19 +87,20 @@
         
         #editor {
             position: relative;
-            width: 70%;
+            width: 100%;
             height: 50%;
         }
         
         #eval-area {
             position: relative;
-            width: 70%;
-            height: 20%;
+            width: 100%;
+            height: 40%;
+            background: rgb(220,220,220);
         }
         
         #server-path {
             position: relative;
-            width: 70%;
+            width: 100%;
             height: 30px;
         }
     </style>

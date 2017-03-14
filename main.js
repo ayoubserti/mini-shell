@@ -1,13 +1,13 @@
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
 const url = require('url')
-const {ipcMain} = require('electron')
+const {ipcMain,globalShortcut} = require('electron')
 const {evalOnServer} = require('./lib/eval-on-server.js');
 
 
 
 const {dialog, Menu} = require('electron')
-const {exec} = require('child_process')
+const {spawn} = require('child_process')
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -39,7 +39,36 @@ const menus = [
         label: 'Start Solution',
         click() {
           if (currentSolutionPath && currentServerPath) {
-            exec(currentServerPath + " " + currentSolutionPath);
+
+
+            const wakandaServer = spawn(currentServerPath, [currentSolutionPath]);
+
+            wakandaServer.stdout.on('data', (data) => {
+             
+              if ( data.toString().match('"backend" project\.*'))
+              {
+                //backend project started
+               
+                setTimeout(function(){
+                  evalOnServer("var d=10; d;",(e,res)=>{
+                    if(res) {
+                        console.log(`${res}` );
+                        win.webContents.send('connected-server',currentSolutionPath)
+                    }
+                  })
+                },1000)
+              }
+              
+            });
+
+            wakandaServer.stderr.on('data', (data) => {
+                dialog.showErrorBox("Error Launching Wakanda Server", data)
+            });
+
+            wakandaServer.on('close', (code) => {
+              console.log(`wakanda server process exited with code ${code}`);
+            });
+          
           }
         }
 
@@ -83,7 +112,8 @@ const menus = [
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({ width: 800, height: 600 })
-
+  //maximize
+  win.maximize();
   // and load the index.html of the app.
   win.loadURL(url.format({
     pathname: path.join(__dirname, 'index.html'),
@@ -91,7 +121,7 @@ function createWindow() {
     slashes: true
   }))
 
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
   // Emitted when the window is closed.
   win.on('closed', () => {
     // Dereference the window object, usually you would store windows
@@ -105,7 +135,7 @@ function createWindow() {
 
 //register ipcMain msg handler
 ipcMain.on("eval-on-server", (event, arg) => {
-  evalOnServer(arg, function (err, data) {
+evalOnServer(arg, function (err, data) {
     
     event.sender.send("eval-done", data.toString());
   })
